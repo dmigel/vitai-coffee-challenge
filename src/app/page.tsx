@@ -11,7 +11,7 @@ export default function Home() {
           width={180}
           height={38}
           priority
-        />
+        /> xD
         <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
           <li className="mb-2 tracking-[-.01em]">
             Get started by editing{" "}
