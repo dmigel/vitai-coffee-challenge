@@ -627,3 +627,198 @@ body {
     transform: none;
   }
 }
+
+/* Contacts: слева текст, справа карта */
+.contacts-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2.5rem;
+}
+
+@media (min-width: 900px) {
+  .contacts-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+    gap: 2.75rem;
+    align-items: start;
+  }
+}
+
+.contacts-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.contacts-block + .contacts-block {
+  padding-top: 0.25rem;
+}
+
+.contacts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  max-width: 28rem;
+}
+
+.contacts-list-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.contacts-list-item:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.contacts-list-label {
+  font-size: 0.875rem;
+  line-height: 1.35;
+  color: var(--muted);
+}
+
+.contacts-list-value {
+  font-size: 1.05rem;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--foreground);
+  font-variant-numeric: tabular-nums;
+}
+
+.contacts-map {
+  width: 100%;
+}
+
+.contacts-map-frame {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.contacts-map-stub {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.85rem;
+  height: 100%;
+  padding: 1.5rem 1.25rem;
+  text-align: center;
+  background:
+    radial-gradient(
+      ellipse 70% 55% at 50% 42%,
+      rgb(196 122 58 / 0.18) 0%,
+      transparent 70%
+    ),
+    linear-gradient(
+      165deg,
+      #f3e6d4 0%,
+      #ebe0d0 45%,
+      #e4d5c3 100%
+    );
+}
+
+.contacts-map-stub-pin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow:
+    0 2px 0 rgb(255 255 255 / 0.55) inset,
+    0 8px 20px rgb(44 27 18 / 0.14);
+}
+
+.contacts-map-stub-logo {
+  width: 2.5rem;
+  height: 2.5rem;
+  object-fit: contain;
+}
+
+.contacts-map-stub-address {
+  margin: 0;
+  max-width: 16rem;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--foreground);
+}
+
+.contacts-map-show-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  border: none;
+  border-radius: var(--radius);
+  padding: 0.7rem 1.35rem;
+  font-family: var(--font-unbounded), system-ui, sans-serif;
+  font-size: 0.875rem;
+  line-height: 1.25;
+  color: #fff;
+  cursor: pointer;
+  background: linear-gradient(135deg, #d4894a 0%, #c47a3a 45%, #a8642c 100%);
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 0.22) inset,
+    0 6px 16px rgb(168 100 44 / 0.22);
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease;
+}
+
+.contacts-map-show-btn:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 0.28) inset,
+    0 10px 22px rgb(168 100 44 / 0.32);
+}
+
+.contacts-map-show-btn:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 3px rgb(196 122 58 / 0.35),
+    0 6px 16px rgb(168 100 44 / 0.22);
+}
+
+.contacts-map-iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  /* Тёплые тона сайта: сепия + лёгкое приглушение холода тайлов */
+  filter: sepia(0.28) saturate(0.9) brightness(1.02) hue-rotate(-8deg);
+}
+
+.contacts-map-open {
+  margin: 0.85rem 0 0;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.contacts-map-open-link {
+  color: var(--accent-hover);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.contacts-map-open-link:hover {
+  color: var(--accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .contacts-map-show-btn {
+    transition: none;
+  }
+
+  .contacts-map-show-btn:hover {
+    transform: none;
+  }
+}

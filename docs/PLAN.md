@@ -17,15 +17,15 @@ src/
       Products.tsx
       About.tsx
       OrderForm.tsx
-      Contacts.tsx              # заглушка
+      Contacts.tsx
     HeroBackgroundVideo.tsx     # "use client"
     ProductOrderButton.tsx      # "use client"
     LeadForm.tsx                # "use client"; Заказ v2 (items + qty)
     UtmCapture.tsx              # "use client"
-    YandexMap.tsx               # позже
+    YandexMap.tsx               # "use client"; iframe по клику
   data/
     products.ts                 # 5 карточек + канал prefill (URL)
-    contacts.ts                 # позже
+    contacts.ts                 # адрес, coords, заглушки телефон / TG / IG
   lib/
     lead-schema.ts              # zod: items, UTM camelCase
     lead-schema.test.ts
@@ -52,7 +52,7 @@ vitest.config.ts
 |---|---|---|
 | `src/app/layout.tsx` | `lang=ru`, next/font, `UtmCapture` | есть |
 | `src/app/page.tsx` | Сборка 5 секций | есть |
-| `src/app/globals.css` | Токены, Hero / Products / About / форма / степперы | есть |
+| `src/app/globals.css` | Токены, Hero / Products / About / форма / Contacts | есть |
 | `src/components/sections/Hero.tsx` | `#hero` | есть |
 | `src/components/HeroBackgroundVideo.tsx` | Ленивое видео фона | есть |
 | `src/components/sections/Products.tsx` | `#products` | есть |
@@ -63,9 +63,9 @@ vitest.config.ts
 | `src/components/LeadForm.tsx` | Заказ v2: состав, qty, UTM optional | есть |
 | `src/components/UtmCapture.tsx` | Захват UTM при загрузке | есть |
 | `src/lib/utm.ts` | `captureUtmFromLocation` / `readUtm` | есть |
-| `src/components/sections/Contacts.tsx` | `#contacts` | заглушка |
-| `src/components/YandexMap.tsx` | Ленивая карта | позже |
-| `src/data/contacts.ts` | Заглушки телефон / Telegram / Instagram | позже |
+| `src/components/sections/Contacts.tsx` | `#contacts`: самовывоз / доставка / связь + карта | есть |
+| `src/components/YandexMap.tsx` | CSS-заглушка; iframe по клику; placemark `pt` | есть |
+| `src/data/contacts.ts` | Адрес ул. Короля, 9; coords; заглушки контактов | есть |
 | `src/lib/phone.ts` | Коды BY, нормализация → `+375XXXXXXXXX` | есть |
 | `src/lib/phone-mask.ts` | Маска ввода телефона | есть |
 | `src/lib/lead-schema.ts` | zod: `items`, лимиты по типу, UTM optional | есть |
@@ -75,9 +75,9 @@ vitest.config.ts
 | `src/app/api/lead/route.ts` | `POST /api/lead` → `create_lead(..., $4::jsonb, ...)` | есть |
 | `docs/manual-tests.md` | curl: UTM / items / подписка / дедуп | есть |
 
-Server Components по умолчанию. `"use client"`: форма, UTM, видео, кнопка заказа; позже — карта.
+Server Components по умолчанию. `"use client"`: форма, UTM, видео, кнопка заказа, карта.
 
-Контейнер Products / About / Order: `max-w-[1280px]`. Order: заголовок и форма по центру страницы.
+Контейнер Products / About / Order / Contacts: `max-w-[1280px]`. Order: заголовок и форма по центру. Contacts: две колонки (текст слева, карта справа; с ~900px).
 
 Env (имена в `.env.example`): `DATABASE_URL` (Transaction pooler, 6543), `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `NEXT_PUBLIC_SITE_URL`.
 
@@ -105,7 +105,9 @@ Env (имена в `.env.example`): `DATABASE_URL` (Transaction pooler, 6543), `
 
 Products: фон белый; карточки — `box-shadow: 0 2px 10px rgba(143, 149, 172, .2)`; подписка — `border` accent; бейдж «Акция» — `#e11d48`.
 
-About: фон `background`; фото 50/50, `gap: 2rem`, `aspect-ratio: 4/5`, lazy `next/image`; блоки «секрет» / «график» без карточек.
+About: фон `background`; фото 50/50, `aspect-ratio: 4/5`, lazy `next/image`; блоки «секрет» / «график» без карточек.
+
+Contacts: фон `background`; блоки самовывоз / доставка / связь — списки без карточек; карта с фиксированной высотой (без CLS).
 
 ## Шаг 2 (сделано)
 
@@ -133,18 +135,24 @@ About: фон `background`; фото 50/50, `gap: 2rem`, `aspect-ratio: 4/5`, la
 - Vitest, `manual-tests.md`
 - Зависимости: `zod`, `pg`, `@types/pg`, `server-only`, `vitest`
 
+Contacts (Слайд 5):
+
+- Тексты SPEC; адрес Минск, ул. Короля, 9; coords `53.902241, 27.542023`
+- Самовывоз / доставка / «Связаться с нами быстро» — единый стиль списков; контакты без `<a>`, заглушки в `contacts.ts`
+- Сетка: слева контакты, справа карта (1 колонка на мобиле)
+- `YandexMap`: CSS-заглушка с логотипом-пином и «Показать карту»; iframe монтируется только по клику; `loading="lazy"`, `title`, фиксированная высота; метка дома через `pt` виджета; ссылка «Открыть в Яндекс.Картах»
+
 ## Следующие шаги
 
-1. Contacts — самовывоз/доставка, `contacts.ts`, ленивая Яндекс.Карта
-2. SEO / Open Graph (логотип `src/assets/logo.png`)
-3. Лёгкий CSS-motion (transform/opacity), финальный lint/build и ручной прогон чеклиста
+1. SEO / Open Graph (логотип `src/assets/logo.png`)
+2. Лёгкий CSS-motion (transform/opacity), финальный lint/build и ручной прогон чеклиста
 
 ## Риски скорости
 
 | Риск | Снятие |
 |---|---|
 | Hero-видео (1.8–8 MB) | LCP = постер (`priority`); `<video>` после idle; `preload="metadata"`; fade на `canplay`; не грузить при reduced-motion / saveData / 2g; мобилка `bgMin.mp4`, десктоп `bg.mp4` |
-| Яндекс.Карта | SSR-заглушка; iframe по клику или в viewport |
+| Яндекс.Карта | SSR/CSS-заглушка; iframe только по клику; placemark через `pt` (без CSS-оверлея); фиксированная высота кадра |
 | Шрифты | `next/font`, 2 начертания, subset с кириллицей |
 | Клиентский JS | Минимум `"use client"`; анимации только CSS (`transform`/`opacity`); blur не анимировать |
 | Картинки | Только `next/image`; `priority` у одной LCP-картинки; Products / About без `priority`, `sizes` |
