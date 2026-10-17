@@ -15,7 +15,7 @@ src/
     sections/
       Hero.tsx                 # есть
       Products.tsx             # есть
-      About.tsx                # заглушка
+      About.tsx                # есть
       OrderForm.tsx            # заглушка → позже "use client"
       Contacts.tsx             # заглушка
     HeroBackgroundVideo.tsx    # есть, "use client"
@@ -45,13 +45,13 @@ docs/
 |---|---|---|
 | `src/app/layout.tsx` | `lang=ru`, next/font, оболочка | есть |
 | `src/app/page.tsx` | Сборка 5 секций | есть |
-| `src/app/globals.css` | Токены, scroll-behavior, стили Hero / Products | есть |
+| `src/app/globals.css` | Токены, scroll-behavior, стили Hero / Products / About | есть |
 | `src/components/sections/Hero.tsx` | `#hero` — постер, лого, тексты, CTA | есть |
 | `src/components/HeroBackgroundVideo.tsx` | Ленивое видео фона | есть |
 | `src/components/sections/Products.tsx` | `#products` — сетка карточек | есть |
 | `src/components/ProductOrderButton.tsx` | CTA → `#order` с предвыбором в URL | есть |
 | `src/data/products.ts` | 5 товаров, тексты из ТЗ, протокол предвыбора | есть |
-| `src/components/sections/About.tsx` | `#about` | заглушка |
+| `src/components/sections/About.tsx` | `#about` — фото, тексты, блоки секрет/график | есть |
 | `src/components/sections/OrderForm.tsx` | `#order` | заглушка |
 | `src/components/sections/Contacts.tsx` | `#contacts` | заглушка |
 | `src/components/YandexMap.tsx` | Ленивая карта | позже |
@@ -67,6 +67,8 @@ docs/
 Server Components по умолчанию. `"use client"` только: форма, UTM, видео, карта, кнопка заказа из Products.
 
 Предвыбор Products → форма: search-параметры `interest_type` + `product`, hash `#order` (см. комментарий в `products.ts`). Форма пока не читает их.
+
+Контейнер контента секций Products / About: `max-w-[1280px]`, по центру.
 
 ## Дизайн-токены
 
@@ -92,6 +94,8 @@ Server Components по умолчанию. `"use client"` только: форм
 
 Секция Products: фон белый; карточки — `box-shadow: 0 2px 10px rgba(143, 149, 172, .2)`; у подписки дополнительно `border` accent; бейдж «Акция» — `#e11d48`.
 
+Секция About: фон `background`; два фото 50/50, `gap: 2rem`, `aspect-ratio: 4/5`, lazy `next/image`; блоки «секрет» / «график» — текст + inline-SVG, без карточек и рамок.
+
 ## Шаг 2 (сделано)
 
 - Токены в `globals.css`, mobile-first отступы в секциях
@@ -105,16 +109,16 @@ Server Components по умолчанию. `"use client"` только: форм
 
 - Hero (Слайд 1): тексты дословно, LCP-постер, ленивое видео, CTA → `#products`
 - Products (Слайд 2): `products.ts`, карточки, предвыбор через URL → `#order`
+- About (Слайд 3): фото Ани/Димы, тексты ТЗ, акценты секрет/график
 
 ## Следующие шаги
 
-1. About — фото Ани/Димы, тексты ТЗ
-2. OrderForm UI — поля, маска телефона, zod на клиенте; чтение предвыбора из URL
-3. `POST /api/lead` — `create_lead`, дедуп 10 мин
-4. Telegram — формат сообщения задаётся отдельно
-5. Contacts — самовывоз/доставка, заглушки, ленивая карта
-6. SEO / Open Graph — метаданные задаются отдельно
-7. UTM, лёгкий CSS-motion, финальный lint/build
+1. OrderForm UI — поля, маска телефона, zod на клиенте; чтение предвыбора из URL
+2. `POST /api/lead` — `create_lead`, дедуп 10 мин
+3. Telegram — формат сообщения задаётся отдельно
+4. Contacts — самовывоз/доставка, заглушки, ленивая карта
+5. SEO / Open Graph — метаданные задаются отдельно
+6. UTM, лёгкий CSS-motion, финальный lint/build
 
 Зависимости позже: `zod`, `pg`, `@types/pg`, `server-only`.
 
@@ -126,5 +130,5 @@ Server Components по умолчанию. `"use client"` только: форм
 | Яндекс.Карта | SSR-заглушка; iframe по клику или появлении в viewport |
 | Шрифты | `next/font`, 2 начертания, subset с кириллицей |
 | Клиентский JS | Минимум `"use client"`; анимации только CSS (`transform`/`opacity`); blur не анимировать |
-| Картинки | Только `next/image`; `priority` у одной LCP-картинки (постер); у Products без `priority`, фиксированный контейнер / `object-contain` |
+| Картинки | Только `next/image`; `priority` у одной LCP-картинки (постер); Products / About без `priority`, фиксированный контейнер / `sizes` |
 | Двойная заявка | Дедуп в SQL (`create_lead` + advisory lock) |
