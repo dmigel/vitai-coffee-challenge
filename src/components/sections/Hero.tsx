@@ -22,31 +22,28 @@ export function Hero() {
       <div className="hero-overlay absolute inset-0 z-[1]" aria-hidden />
       <div className="hero-glow" aria-hidden />
 
-      <div className="relative z-10 flex min-h-svh flex-col px-5 pb-10 pt-5 sm:px-8 sm:pb-14 sm:pt-6 lg:px-16">
+      <div className="relative z-10 flex min-h-svh flex-col px-5 pb-12 pt-5 sm:px-8 sm:pb-16 sm:pt-6 lg:px-16 lg:pb-[100px]">
         <Image
           src={logo}
           alt="Кварта"
-          width={48}
-          height={48}
-          className="h-10 w-10 sm:h-12 sm:w-12"
-          sizes="48px"
+          width={60}
+          height={60}
+          className="h-[60px] w-[60px] rounded-[20px]"
+          sizes="60px"
         />
 
         <div className="flex flex-1 flex-col justify-center py-6 sm:py-10">
-          <h1 className="font-display max-w-3xl text-[1.75rem] leading-tight tracking-tight text-white sm:text-4xl lg:text-6xl">
+          <h1 className="font-display max-w-3xl text-[34px] leading-tight tracking-tight text-white sm:text-4xl lg:text-6xl xl:max-w-5xl xl:text-[70px]">
             Кофе, который не успевает остыть на складе.
           </h1>
-          <p className="mt-4 max-w-xl text-base leading-relaxed text-white/85 sm:mt-6 sm:text-lg lg:text-xl">
+          <p className="mt-4 max-w-xl text-base leading-relaxed text-white/85 sm:mt-6 sm:text-lg lg:text-xl xl:text-[22px]">
             Мастерская «Кварта». Обжариваем спешелти-зерно партиями по 5 кг и
             привозим к вам домой на 1–3 день после обжарки.
           </p>
-          <a
-            href="#products"
-            className="mt-7 inline-flex w-fit items-center rounded-lg bg-accent px-5 py-3 text-sm text-surface transition-colors hover:bg-accent-hover sm:mt-10 sm:px-6 sm:py-3.5 sm:text-base"
-          >
-            Выбрать свой кофе ↓
-          </a>
         </div>
+        <a href="#products" className="product-cta mx-auto">
+          Выбрать свой кофе
+        </a>
       </div>
     </section>
   );

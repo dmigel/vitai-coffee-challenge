@@ -9,7 +9,7 @@
 - Источник рекламы: utm_source и utm_campaign, плюс страница входа (landing_url). Все три необязательны.
 - Контакты (телефон/Telegram/Instagram) — статичная вёрстка без ссылок. Реальных значений пока нет, ставить заметные заглушки.
 - Фото: src/assets/Anna.jpg, src/assets/Dmitry.jpg, src/assets/1.jpg … 5.jpg.
-- Видео: /public/video/bgMin.mp4 (мобильные), /public/video/bg.mp4 (десктоп). Постер: src/assets/bgposter.jpg.
+- Видео: /public/video/bgMin.mp4. Постер: src/assets/bgposter.jpg.
 - Логотип: src/assets/logo.png (импорт через алиас @/assets/logo.png).
 
 ## Заказ v2 (приоритет над всем остальным в файле)

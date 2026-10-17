@@ -43,7 +43,7 @@ public/
   og.png                    # 1200×630
   favicon.png
   apple-touch-icon.png
-  video/                    # bgMin.mp4, bg.mp4
+  video/                    # bgMin.mp4
 scripts/
   make-og.ts                # sharp → og / favicon / apple-touch
 supabase/migrations/
@@ -139,7 +139,7 @@ SEO / OG: Metadata API (`metadataBase`, canonical, `ru_BY`, Twitter `summary_lar
 
 | Риск | Снятие |
 |---|---|
-| Hero-видео (1.8–8 MB) | LCP = постер (`priority`); `<video>` после idle; `preload="metadata"`; не грузить при reduced-motion / saveData / 2g; мобилка `bgMin.mp4`, десктоп `bg.mp4` |
+| Hero-видео (1.8–8 MB) | LCP = постер (`priority`); `<video>` после idle; `preload="metadata"`; не грузить при reduced-motion / saveData / 2g; мобилка `bgMin.mp4` |
 | Яндекс.Карта | SSR/CSS-заглушка; iframe только по клику; фиксированная высота кадра |
 | Шрифты | `next/font`, 2 начертания, subset с кириллицей |
 | Клиентский JS | Минимум `"use client"`; анимации только CSS; blur не анимировать |

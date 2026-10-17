@@ -31,9 +31,7 @@ function canLoadVideo(): boolean {
 }
 
 function pickVideoSrc(): string {
-  return window.matchMedia("(min-width: 768px)").matches
-    ? "/video/bg.mp4"
-    : "/video/bgMin.mp4";
+  return "/video/bgMin.mp4";
 }
 
 export function HeroBackgroundVideo() {

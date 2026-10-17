@@ -115,9 +115,6 @@ export function About() {
 
         <div className="about-accents flex max-w-3xl flex-col gap-6 sm:gap-8">
           <div className="flex gap-3 sm:gap-4">
-            <span className="mt-0.5 shrink-0 text-accent">
-              <SecretIcon />
-            </span>
             <div>
               <h3 className="font-display text-lg leading-snug tracking-tight sm:text-xl">
                 В чем наш секрет?
@@ -131,9 +128,6 @@ export function About() {
           </div>
 
           <div className="flex gap-3 sm:gap-4">
-            <span className="mt-0.5 shrink-0 text-accent">
-              <ScheduleIcon />
-            </span>
             <div>
               <h3 className="font-display text-lg leading-snug tracking-tight sm:text-xl">
                 Наш график
