@@ -1,4 +1,9 @@
-import { getSiteUrl, siteDescription, siteName } from "@/lib/site";
+import {
+  getOgImageUrl,
+  getSiteUrl,
+  siteDescription,
+  siteName,
+} from "@/lib/site";
 
 /**
  * JSON-LD CoffeeShop: адрес и часы из ТЗ, без телефона и рейтингов.
@@ -12,7 +17,7 @@ export function JsonLd() {
     name: siteName,
     description: siteDescription,
     url: siteUrl,
-    image: `${siteUrl}/og.png`,
+    image: getOgImageUrl(),
     address: {
       "@type": "PostalAddress",
       streetAddress: "ул. Короля, 9",

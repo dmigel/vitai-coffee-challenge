@@ -3,6 +3,7 @@ import { Manrope, Unbounded } from "next/font/google";
 
 import { UtmCapture } from "@/components/UtmCapture";
 import {
+  getOgImageUrl,
   getSiteUrl,
   siteDescription,
   siteName,
@@ -26,6 +27,7 @@ const unbounded = Unbounded({
 });
 
 const siteUrl = getSiteUrl();
+const ogImage = getOgImageUrl();
 
 export const metadata: Metadata = {
   metadataBase: siteUrl,
@@ -47,7 +49,9 @@ export const metadata: Metadata = {
     url: "/",
     images: [
       {
-        url: "/og.png",
+        url: ogImage,
+        secureUrl: ogImage,
+        type: "image/png",
         width: 1200,
         height: 630,
         alt: `${siteName} — свежеобжаренный кофе в Минске`,
@@ -58,7 +62,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: siteTitle,
     description: siteDescription,
-    images: ["/og.png"],
+    images: [ogImage],
   },
 };
 
