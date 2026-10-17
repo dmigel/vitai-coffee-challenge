@@ -41,3 +41,45 @@ body {
   color: var(--foreground);
   font-family: var(--font-manrope), system-ui, sans-serif;
 }
+
+/* Hero: статичный оверлей и пятно — blur не анимируем */
+.hero-overlay {
+  background:
+    linear-gradient(
+      180deg,
+      rgb(20 12 8 / 0.55) 0%,
+      rgb(20 12 8 / 0.35) 42%,
+      rgb(20 12 8 / 0.72) 100%
+    );
+}
+
+.hero-glow {
+  pointer-events: none;
+  position: absolute;
+  inset: auto auto 15% -10%;
+  z-index: 1;
+  width: min(70vw, 28rem);
+  height: min(50vh, 20rem);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgb(196 122 58 / 0.28) 0%,
+    transparent 70%
+  );
+  filter: blur(48px);
+}
+
+.hero-video {
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+
+.hero-video.is-ready {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-video {
+    transition: none;
+  }
+}
