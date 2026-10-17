@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import { Manrope, Unbounded } from "next/font/google";
+
+import { UtmCapture } from "@/components/UtmCapture";
+
 import "./globals.css";
 
 const manrope = Manrope({
@@ -32,6 +35,7 @@ export default function RootLayout({
       <body
         className={`${manrope.variable} ${unbounded.variable} min-h-dvh bg-background font-sans text-foreground antialiased`}
       >
+        <UtmCapture />
         {children}
       </body>
     </html>

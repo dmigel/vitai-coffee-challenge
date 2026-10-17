@@ -22,10 +22,9 @@ import img5 from "@/assets/5.jpg";
  * Правила (SPEC): one_time → продукт обязателен и не "subscription";
  * subscription → product всегда "subscription".
  *
- * Форма (позже) читает `interest_type` и `product` из `window.location.search`
- * (или через useSearchParams) при монтировании и при popstate / hashchange,
- * и подставляет значения в поля. Клиентский контекст не обязателен —
- * URL и есть общий канал передачи выбора.
+ * Форма читает `interest_type` и `product` из `window.location.search`
+ * при монтировании, popstate / hashchange и событии `kvarta:order-prefill`,
+ * и подставляет значения в поля. URL — общий канал передачи выбора.
  */
 
 export type ProductId =

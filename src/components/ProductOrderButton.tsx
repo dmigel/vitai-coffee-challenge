@@ -39,6 +39,8 @@ function selectAndScrollToOrder(
   document.getElementById("order")?.scrollIntoView({
     behavior: reduceMotion ? "auto" : "smooth",
   });
+
+  window.dispatchEvent(new CustomEvent("kvarta:order-prefill"));
 }
 
 export function ProductOrderButton({

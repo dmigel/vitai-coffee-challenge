@@ -10,33 +10,36 @@ src/
     layout.tsx
     page.tsx
     globals.css
-    api/lead/route.ts          # позже
+    api/lead/route.ts
   components/
     sections/
-      Hero.tsx                 # есть
-      Products.tsx             # есть
-      About.tsx                # есть
-      OrderForm.tsx            # заглушка → позже "use client"
-      Contacts.tsx             # заглушка
-    HeroBackgroundVideo.tsx    # есть, "use client"
-    ProductOrderButton.tsx     # есть, "use client"
-    YandexMap.tsx              # позже, "use client"
-    UtmCapture.tsx             # позже, "use client"
+      Hero.tsx
+      Products.tsx
+      About.tsx
+      OrderForm.tsx              # заглушка → позже "use client"
+      Contacts.tsx              # заглушка
+    HeroBackgroundVideo.tsx     # "use client"
+    ProductOrderButton.tsx      # "use client"
+    YandexMap.tsx               # позже, "use client"
+    UtmCapture.tsx              # позже, "use client"
   data/
-    products.ts                # есть
-    contacts.ts                # позже
+    products.ts
+    contacts.ts                 # позже
   lib/
-    lead-schema.ts             # позже
-    phone.ts                   # позже
-    db.ts                      # позже, server-only
-    telegram.ts                # позже, server-only
-  assets/                      # есть
-public/video/                  # bgMin.mp4, bg.mp4 — есть
+    lead-schema.ts
+    lead-schema.test.ts
+    phone.ts
+    db.ts                       # server-only
+    telegram.ts                 # server-only
+  assets/
+public/video/                   # bgMin.mp4, bg.mp4
 supabase/migrations/
-  001_leads.sql                # есть
+  001_leads.sql
 docs/
   SPEC.md
   PLAN.md
+  manual-tests.md
+vitest.config.ts
 ```
 
 ## Компоненты и файлы
@@ -57,18 +60,23 @@ docs/
 | `src/components/YandexMap.tsx` | Ленивая карта | позже |
 | `src/components/UtmCapture.tsx` | `utm_source`, `utm_campaign`, `landing_url` | позже |
 | `src/data/contacts.ts` | Заглушки телефон / Telegram / Instagram | позже |
-| `src/lib/lead-schema.ts` | zod, клиент + сервер | позже |
-| `src/lib/phone.ts` | Коды BY, нормализация `+375XXXXXXXXX` | позже |
-| `src/lib/db.ts` | `pg` + `DATABASE_URL` | позже |
-| `src/lib/telegram.ts` | Отправка в Telegram | позже |
-| `src/app/api/lead/route.ts` | `POST /api/lead` | позже |
+| `src/lib/phone.ts` | Коды BY, `normalizeBelarusPhone` → `+375XXXXXXXXX` | есть |
+| `src/lib/lead-schema.ts` | zod, клиент + сервер; honeypot `website` | есть |
+| `src/lib/lead-schema.test.ts` | Vitest: телефон, product/interestType, utm | есть |
+| `src/lib/db.ts` | `pg` + `DATABASE_URL`, пул max:1 | есть |
+| `src/lib/telegram.ts` | `sendLeadToTelegram`, HTML + escape, таймаут 5 с | есть |
+| `src/app/api/lead/route.ts` | `POST /api/lead` → `create_lead`, Telegram | есть |
+| `docs/manual-tests.md` | curl / SQL для ручной проверки дедупа | есть |
 | `eslint.config.mjs` | ESLint (next/core-web-vitals) | есть |
+| `vitest.config.ts` | Vitest, alias `@` | есть |
 
 Server Components по умолчанию. `"use client"` только: форма, UTM, видео, карта, кнопка заказа из Products.
 
 Предвыбор Products → форма: search-параметры `interest_type` + `product`, hash `#order` (см. комментарий в `products.ts`). Форма пока не читает их.
 
 Контейнер контента секций Products / About: `max-w-[1280px]`, по центру.
+
+Env (имена в `.env.example`): `DATABASE_URL`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `NEXT_PUBLIC_SITE_URL`.
 
 ## Дизайн-токены
 
@@ -103,24 +111,22 @@ Server Components по умолчанию. `"use client"` только: форм
 - `layout.tsx` (`lang=ru`), `page.tsx` с пятью секциями (`id`: hero, products, about, order, contacts)
 - Плавный скролл по якорям (`scroll-behavior: smooth`; при `prefers-reduced-motion` — `auto`)
 - ESLint (`eslint-config-next`), скрипт `npm run lint`
-- Форма и API не трогались
 
 Также уже сделано после шага 2:
 
 - Hero (Слайд 1): тексты дословно, LCP-постер, ленивое видео, CTA → `#products`
 - Products (Слайд 2): `products.ts`, карточки, предвыбор через URL → `#order`
 - About (Слайд 3): фото Ани/Димы, тексты ТЗ, акценты секрет/график
+- Приём заявок: `lead-schema` / `phone`, `db`, `telegram`, `POST /api/lead` (`create_lead`, дедуп 10 мин в SQL), Vitest (`npm test`), `docs/manual-tests.md`
+- Зависимости: `zod`, `pg`, `@types/pg`, `server-only`, `vitest`
 
 ## Следующие шаги
 
-1. OrderForm UI — поля, маска телефона, zod на клиенте; чтение предвыбора из URL
-2. `POST /api/lead` — `create_lead`, дедуп 10 мин
-3. Telegram — формат сообщения задаётся отдельно
-4. Contacts — самовывоз/доставка, заглушки, ленивая карта
-5. SEO / Open Graph — метаданные задаются отдельно
-6. UTM, лёгкий CSS-motion, финальный lint/build
-
-Зависимости позже: `zod`, `pg`, `@types/pg`, `server-only`.
+1. OrderForm UI — поля, маска телефона, zod на клиенте; чтение предвыбора из URL; отправка на `/api/lead`
+2. Contacts — самовывоз/доставка, заглушки в `contacts.ts`, ленивая Яндекс.Карта
+3. UtmCapture — захват `utm_source`, `utm_campaign`, `landing_url`
+4. SEO / Open Graph — метаданные задаются отдельно
+5. Лёгкий CSS-motion, финальный lint/build
 
 ## Риски скорости
 
@@ -131,4 +137,5 @@ Server Components по умолчанию. `"use client"` только: форм
 | Шрифты | `next/font`, 2 начертания, subset с кириллицей |
 | Клиентский JS | Минимум `"use client"`; анимации только CSS (`transform`/`opacity`); blur не анимировать |
 | Картинки | Только `next/image`; `priority` у одной LCP-картинки (постер); Products / About без `priority`, фиксированный контейнер / `sizes` |
-| Двойная заявка | Дедуп в SQL (`create_lead` + advisory lock) |
+| Двойная заявка | Дедуп в SQL (`create_lead` + advisory lock); honeypot `website` |
+| Serverless + Postgres | Пул `pg` один на модуль, `max: 1`, короткий `idleTimeoutMillis` |

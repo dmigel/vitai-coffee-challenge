@@ -259,3 +259,228 @@ body {
 .about-photo {
   aspect-ratio: 4 / 5;
 }
+
+/* Order form */
+.order-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.order-honeypot {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.order-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.order-field label {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--foreground);
+}
+
+.order-optional {
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.order-field input,
+.order-field textarea,
+.order-select-wrap select {
+  width: 100%;
+  min-height: 2.75rem;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  background: #fff;
+  color: var(--foreground);
+  font-family: var(--font-manrope), system-ui, sans-serif;
+  font-size: 1rem;
+  line-height: 1.4;
+  padding: 0.7rem 1rem;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.order-field textarea {
+  min-height: 7rem;
+  resize: vertical;
+  padding-top: 0.85rem;
+}
+
+.order-field input::placeholder,
+.order-field textarea::placeholder {
+  color: color-mix(in srgb, var(--muted) 72%, white);
+}
+
+.order-field input:hover:not(:disabled),
+.order-field textarea:hover:not(:disabled),
+.order-select-wrap select:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+}
+
+.order-field input:focus,
+.order-field textarea:focus,
+.order-select-wrap select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgb(196 122 58 / 0.22);
+}
+
+.order-field input:disabled,
+.order-field textarea:disabled,
+.order-select-wrap select:disabled {
+  background: #f3eee7;
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+.order-field input[aria-invalid="true"],
+.order-field textarea[aria-invalid="true"],
+.order-select-wrap select[aria-invalid="true"] {
+  border-color: #c2410c;
+}
+
+.order-select-wrap {
+  position: relative;
+}
+
+.order-select-wrap::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  top: 50%;
+  right: 1.1rem;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: translateY(-65%) rotate(45deg);
+}
+
+.order-select-wrap select {
+  appearance: none;
+  padding-right: 2.75rem;
+  cursor: pointer;
+}
+
+.order-field-error {
+  min-height: 1.25rem;
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.35;
+  color: #c2410c;
+}
+
+.order-form-error {
+  border: 1.5px solid #c2410c;
+  border-radius: var(--radius);
+  background: #fff7ed;
+  padding: 0.9rem 1rem;
+  color: #9a3412;
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.order-form-error p {
+  margin: 0;
+}
+
+.order-form-error-link {
+  color: var(--accent-hover);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.order-form-error-link:hover {
+  color: var(--accent);
+}
+
+.order-submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  width: 100%;
+  margin-top: 0.25rem;
+  border: none;
+  border-radius: var(--radius);
+  padding: 0.85rem 1.5rem;
+  font-family: var(--font-unbounded), system-ui, sans-serif;
+  font-size: 1rem;
+  line-height: 1.25;
+  color: #fff;
+  cursor: pointer;
+  background: linear-gradient(135deg, #d4894a 0%, #c47a3a 45%, #a8642c 100%);
+  background-size: 160% 160%;
+  background-position: 0% 50%;
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 0.22) inset,
+    0 6px 16px rgb(168 100 44 / 0.22);
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    background-position 0.35s ease,
+    opacity 0.2s ease;
+}
+
+.order-submit:hover:not(:disabled) {
+  background-position: 100% 50%;
+  transform: translateY(-2px);
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 0.28) inset,
+    0 10px 22px rgb(168 100 44 / 0.32);
+}
+
+.order-submit:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 3px rgb(196 122 58 / 0.35),
+    0 6px 16px rgb(168 100 44 / 0.22);
+}
+
+.order-submit:disabled {
+  cursor: wait;
+  opacity: 0.72;
+  transform: none;
+}
+
+.order-success {
+  border-radius: var(--radius-lg);
+  background: #fffaf3;
+  border: 1.5px solid var(--border);
+  padding: 1.75rem 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .order-submit {
+    width: auto;
+    min-width: 14rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .order-field input,
+  .order-field textarea,
+  .order-select-wrap select,
+  .order-submit {
+    transition: none;
+  }
+
+  .order-submit:hover:not(:disabled) {
+    transform: none;
+  }
+}
