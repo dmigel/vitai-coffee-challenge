@@ -11,6 +11,26 @@ type CreateLeadRow = {
   tg_sent: boolean;
 };
 
+function dbErrorFields(err: unknown): {
+  code: string | undefined;
+  constraint: string | undefined;
+  message: string | undefined;
+} {
+  if (!err || typeof err !== "object") {
+    return { code: undefined, constraint: undefined, message: undefined };
+  }
+  const e = err as {
+    code?: unknown;
+    constraint?: unknown;
+    message?: unknown;
+  };
+  return {
+    code: e.code != null ? String(e.code) : undefined,
+    constraint: e.constraint != null ? String(e.constraint) : undefined,
+    message: e.message != null ? String(e.message) : undefined,
+  };
+}
+
 export async function POST(request: Request) {
   let body: unknown;
   try {
@@ -52,16 +72,16 @@ export async function POST(request: Request) {
 
   try {
     const result = await pool.query<CreateLeadRow>(
-      "select * from public.create_lead($1,$2,$3,$4,$5,$6,$7,$8)",
+      "select * from public.create_lead($1,$2,$3,$4::jsonb,$5,$6,$7,$8)",
       [
         data.name,
         data.phone,
         data.interestType,
-        data.product,
+        JSON.stringify(data.items),
         data.comment,
-        data.utm_source,
-        data.utm_campaign,
-        data.landing_url,
+        data.utmSource,
+        data.utmCampaign,
+        data.landingUrl,
       ],
     );
 
@@ -75,11 +95,8 @@ export async function POST(request: Request) {
     isDuplicate = row.is_duplicate;
     tgSent = row.tg_sent;
   } catch (err) {
-    const code =
-      err && typeof err === "object" && "code" in err
-        ? String((err as { code: unknown }).code)
-        : "unknown";
-    console.error("create_lead_failed", code);
+    const { code, constraint, message } = dbErrorFields(err);
+    console.error("create_lead_failed", { code, constraint, message });
     return NextResponse.json({ ok: false, error: "server" }, { status: 500 });
   }
 
@@ -89,13 +106,13 @@ export async function POST(request: Request) {
     try {
       await sendLeadToTelegram({
         interestType: data.interestType,
-        product: data.product,
+        items: data.items,
         name: data.name,
         phone: data.phone,
         comment: data.comment,
-        utm_source: data.utm_source,
-        utm_campaign: data.utm_campaign,
-        landing_url: data.landing_url,
+        utmSource: data.utmSource,
+        utmCampaign: data.utmCampaign,
+        landingUrl: data.landingUrl,
       });
 
       try {
@@ -104,11 +121,12 @@ export async function POST(request: Request) {
           [leadId],
         );
       } catch (err) {
-        const code =
-          err && typeof err === "object" && "code" in err
-            ? String((err as { code: unknown }).code)
-            : "unknown";
-        console.error("telegram_mark_sent_failed", leadId, code);
+        const { code, constraint, message } = dbErrorFields(err);
+        console.error("telegram_mark_sent_failed", leadId, {
+          code,
+          constraint,
+          message,
+        });
       }
     } catch (err) {
       const message =
@@ -122,11 +140,13 @@ export async function POST(request: Request) {
           [leadId, message],
         );
       } catch (updateErr) {
-        const code =
-          updateErr && typeof updateErr === "object" && "code" in updateErr
-            ? String((updateErr as { code: unknown }).code)
-            : "unknown";
-        console.error("telegram_mark_error_failed", leadId, code);
+        const { code, constraint, message: dbMessage } =
+          dbErrorFields(updateErr);
+        console.error("telegram_mark_error_failed", leadId, {
+          code,
+          constraint,
+          message: dbMessage,
+        });
       }
       // Заявка сохранена — клиенту всё равно 200
     }

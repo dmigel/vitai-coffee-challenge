@@ -1,6 +1,6 @@
 # План проекта «Кварта»
 
-Источник требований: [SPEC.md](./SPEC.md). Секции: Hero, Products, About, OrderForm, Contacts (галереи нет).
+Источник: [SPEC.md](./SPEC.md) (раздел «Заказ v2» приоритетный). Секции: Hero, Products, About, OrderForm, Contacts.
 
 ## Структура папок
 
@@ -16,25 +16,29 @@ src/
       Hero.tsx
       Products.tsx
       About.tsx
-      OrderForm.tsx              # заглушка → позже "use client"
+      OrderForm.tsx
       Contacts.tsx              # заглушка
     HeroBackgroundVideo.tsx     # "use client"
     ProductOrderButton.tsx      # "use client"
-    YandexMap.tsx               # позже, "use client"
-    UtmCapture.tsx              # позже, "use client"
+    LeadForm.tsx                # "use client"; ещё product, не items
+    UtmCapture.tsx              # "use client"
+    YandexMap.tsx               # позже
   data/
     products.ts
     contacts.ts                 # позже
   lib/
-    lead-schema.ts
+    lead-schema.ts              # zod: items, UTM camelCase
     lead-schema.test.ts
     phone.ts
-    db.ts                       # server-only
+    phone-mask.ts
+    utm.ts                      # sessionStorage, snake_case ключи
+    db.ts                       # server-only, pg pool
     telegram.ts                 # server-only
-  assets/
+  assets/                       # logo, постер, 1–5.jpg, Anna, Dmitry
 public/video/                   # bgMin.mp4, bg.mp4
 supabase/migrations/
   001_leads.sql
+  002_leads.sql                 # items jsonb + create_lead(..., p_items jsonb, ...)
 docs/
   SPEC.md
   PLAN.md
@@ -46,37 +50,36 @@ vitest.config.ts
 
 | Файл | Назначение | Статус |
 |---|---|---|
-| `src/app/layout.tsx` | `lang=ru`, next/font, оболочка | есть |
+| `src/app/layout.tsx` | `lang=ru`, next/font, `UtmCapture` | есть |
 | `src/app/page.tsx` | Сборка 5 секций | есть |
-| `src/app/globals.css` | Токены, scroll-behavior, стили Hero / Products / About | есть |
-| `src/components/sections/Hero.tsx` | `#hero` — постер, лого, тексты, CTA | есть |
+| `src/app/globals.css` | Токены, scroll-behavior, Hero / Products / About / форма | есть |
+| `src/components/sections/Hero.tsx` | `#hero` | есть |
 | `src/components/HeroBackgroundVideo.tsx` | Ленивое видео фона | есть |
-| `src/components/sections/Products.tsx` | `#products` — сетка карточек | есть |
-| `src/components/ProductOrderButton.tsx` | CTA → `#order` с предвыбором в URL | есть |
-| `src/data/products.ts` | 5 товаров, тексты из ТЗ, протокол предвыбора | есть |
-| `src/components/sections/About.tsx` | `#about` — фото, тексты, блоки секрет/график | есть |
-| `src/components/sections/OrderForm.tsx` | `#order` | заглушка |
+| `src/components/sections/Products.tsx` | `#products` | есть |
+| `src/components/ProductOrderButton.tsx` | CTA → `#order` (`interest_type` + `product` в URL) | есть |
+| `src/data/products.ts` | 5 карточек, тексты ТЗ | есть |
+| `src/components/sections/About.tsx` | `#about` | есть |
+| `src/components/sections/OrderForm.tsx` | `#order` + `LeadForm` | есть |
+| `src/components/LeadForm.tsx` | Форма; контракт ещё `product` / `utm_source` | есть, не v2 |
+| `src/components/UtmCapture.tsx` | Захват UTM в sessionStorage | есть |
+| `src/lib/utm.ts` | `captureUtmFromLocation` / `readUtm` | есть |
 | `src/components/sections/Contacts.tsx` | `#contacts` | заглушка |
 | `src/components/YandexMap.tsx` | Ленивая карта | позже |
-| `src/components/UtmCapture.tsx` | `utm_source`, `utm_campaign`, `landing_url` | позже |
 | `src/data/contacts.ts` | Заглушки телефон / Telegram / Instagram | позже |
-| `src/lib/phone.ts` | Коды BY, `normalizeBelarusPhone` → `+375XXXXXXXXX` | есть |
-| `src/lib/lead-schema.ts` | zod, клиент + сервер; honeypot `website` | есть |
-| `src/lib/lead-schema.test.ts` | Vitest: телефон, product/interestType, utm | есть |
-| `src/lib/db.ts` | `pg` + `DATABASE_URL`, пул max:1 | есть |
-| `src/lib/telegram.ts` | `sendLeadToTelegram`, HTML + escape, таймаут 5 с | есть |
-| `src/app/api/lead/route.ts` | `POST /api/lead` → `create_lead`, Telegram | есть |
-| `docs/manual-tests.md` | curl / SQL для ручной проверки дедупа | есть |
-| `eslint.config.mjs` | ESLint (next/core-web-vitals) | есть |
-| `vitest.config.ts` | Vitest, alias `@` | есть |
+| `src/lib/phone.ts` | Коды BY, нормализация → `+375XXXXXXXXX` | есть |
+| `src/lib/phone-mask.ts` | Маска ввода телефона | есть |
+| `src/lib/lead-schema.ts` | zod: `items`, лимиты, `utmSource`/`utmCampaign`/`landingUrl` | есть (API v2) |
+| `src/lib/lead-schema.test.ts` | Vitest: телефон, items × 3 типа, qty, UTM | есть |
+| `src/lib/db.ts` | `pg` + `DATABASE_URL`, пул max:1, ssl без строгой проверки | есть |
+| `src/lib/telegram.ts` | Состав построчно, HTML-escape, «прямой заход» | есть |
+| `src/app/api/lead/route.ts` | `POST /api/lead` → `create_lead(..., $4::jsonb, ...)` | есть |
+| `docs/manual-tests.md` | curl: UTM / items / подписка / дедуп | есть |
 
-Server Components по умолчанию. `"use client"` только: форма, UTM, видео, карта, кнопка заказа из Products.
+Server Components по умолчанию. `"use client"`: форма, UTM, видео, кнопка заказа; позже — карта.
 
-Предвыбор Products → форма: search-параметры `interest_type` + `product`, hash `#order` (см. комментарий в `products.ts`). Форма пока не читает их.
+Контейнер Products / About / Order: `max-w-[1280px]`.
 
-Контейнер контента секций Products / About: `max-w-[1280px]`, по центру.
-
-Env (имена в `.env.example`): `DATABASE_URL`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `NEXT_PUBLIC_SITE_URL`.
+Env (имена в `.env.example`): `DATABASE_URL` (Transaction pooler, 6543), `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `NEXT_PUBLIC_SITE_URL`.
 
 ## Дизайн-токены
 
@@ -100,32 +103,32 @@ Env (имена в `.env.example`): `DATABASE_URL`, `TELEGRAM_BOT_TOKEN`, `TELEG
 - `radius` / `rounded` — `1rem`
 - `radius-lg` / `rounded-lg` — `1.5rem`
 
-Секция Products: фон белый; карточки — `box-shadow: 0 2px 10px rgba(143, 149, 172, .2)`; у подписки дополнительно `border` accent; бейдж «Акция» — `#e11d48`.
+Products: фон белый; карточки — `box-shadow: 0 2px 10px rgba(143, 149, 172, .2)`; подписка — `border` accent; бейдж «Акция» — `#e11d48`.
 
-Секция About: фон `background`; два фото 50/50, `gap: 2rem`, `aspect-ratio: 4/5`, lazy `next/image`; блоки «секрет» / «график» — текст + inline-SVG, без карточек и рамок.
+About: фон `background`; фото 50/50, `gap: 2rem`, `aspect-ratio: 4/5`, lazy `next/image`; блоки «секрет» / «график» без карточек.
 
 ## Шаг 2 (сделано)
 
-- Токены в `globals.css`, mobile-first отступы в секциях
+- Токены в `globals.css`, mobile-first отступы
 - Шрифты Unbounded + Manrope
 - `layout.tsx` (`lang=ru`), `page.tsx` с пятью секциями (`id`: hero, products, about, order, contacts)
-- Плавный скролл по якорям (`scroll-behavior: smooth`; при `prefers-reduced-motion` — `auto`)
-- ESLint (`eslint-config-next`), скрипт `npm run lint`
+- `scroll-behavior: smooth` (при `prefers-reduced-motion` — `auto`)
+- ESLint (`eslint-config-next`), `npm run lint`
 
-Также уже сделано после шага 2:
+Уже после шага 2:
 
-- Hero (Слайд 1): тексты дословно, LCP-постер, ленивое видео, CTA → `#products`
-- Products (Слайд 2): `products.ts`, карточки, предвыбор через URL → `#order`
-- About (Слайд 3): фото Ани/Димы, тексты ТЗ, акценты секрет/график
-- Приём заявок: `lead-schema` / `phone`, `db`, `telegram`, `POST /api/lead` (`create_lead`, дедуп 10 мин в SQL), Vitest (`npm test`), `docs/manual-tests.md`
+- Hero, Products, About — тексты ТЗ, LCP-постер, ленивое видео, предвыбор через URL
+- UtmCapture + `utm.ts`
+- OrderForm + LeadForm (старый контракт: одно поле `product`, UTM snake_case)
+- API заявок v2: `items` jsonb, `create_lead` из `002_leads.sql`, `JSON.stringify(items)` + `$4::jsonb`, Telegram с составом, Vitest, `manual-tests.md`
 - Зависимости: `zod`, `pg`, `@types/pg`, `server-only`, `vitest`
 
 ## Следующие шаги
 
-1. OrderForm UI — поля, маска телефона, zod на клиенте; чтение предвыбора из URL; отправка на `/api/lead`
-2. Contacts — самовывоз/доставка, заглушки в `contacts.ts`, ленивая Яндекс.Карта
-3. UtmCapture — захват `utm_source`, `utm_campaign`, `landing_url`
-4. SEO / Open Graph — метаданные задаются отдельно
+1. LeadForm → Заказ v2: порядок полей, мультивыбор `items` + qty, скрытие блока для `question`, текст дубля из SPEC; payload `utmSource` / `utmCampaign` / `landingUrl`
+2. Предвыбор из Products: «Заказать» → `one_time` + позиция qty 1; «Оформить подписку» → `subscription` + скролл
+3. Contacts — самовывоз/доставка, `contacts.ts`, ленивая Яндекс.Карта
+4. SEO / Open Graph
 5. Лёгкий CSS-motion, финальный lint/build
 
 ## Риски скорости
@@ -133,9 +136,9 @@ Env (имена в `.env.example`): `DATABASE_URL`, `TELEGRAM_BOT_TOKEN`, `TELEG
 | Риск | Снятие |
 |---|---|
 | Hero-видео (1.8–8 MB) | LCP = постер (`priority`); `<video>` после idle; `preload="metadata"`; fade на `canplay`; не грузить при reduced-motion / saveData / 2g; мобилка `bgMin.mp4`, десктоп `bg.mp4` |
-| Яндекс.Карта | SSR-заглушка; iframe по клику или появлении в viewport |
+| Яндекс.Карта | SSR-заглушка; iframe по клику или в viewport |
 | Шрифты | `next/font`, 2 начертания, subset с кириллицей |
 | Клиентский JS | Минимум `"use client"`; анимации только CSS (`transform`/`opacity`); blur не анимировать |
-| Картинки | Только `next/image`; `priority` у одной LCP-картинки (постер); Products / About без `priority`, фиксированный контейнер / `sizes` |
+| Картинки | Только `next/image`; `priority` у одной LCP-картинки; Products / About без `priority`, `sizes` |
 | Двойная заявка | Дедуп в SQL (`create_lead` + advisory lock); honeypot `website` |
-| Serverless + Postgres | Пул `pg` один на модуль, `max: 1`, короткий `idleTimeoutMillis` |
+| Serverless + Postgres pooler | Пул `pg` один на модуль, `max: 1`, без именованных prepared statements, `ssl: { rejectUnauthorized: false }` |

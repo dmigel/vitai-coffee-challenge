@@ -9,6 +9,8 @@ function createPool(): Pool {
     throw new Error("DATABASE_URL is not set");
   }
 
+  // Transaction pooler (6543): один клиент, без именованных prepared statements
+  // (pool.query(text, values) — unnamed; name в QueryConfig не используем).
   return new Pool({
     connectionString,
     max: 1,

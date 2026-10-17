@@ -13,6 +13,28 @@ export {
 export const INTEREST_TYPES = ["one_time", "subscription", "question"] as const;
 export type InterestType = (typeof INTEREST_TYPES)[number];
 
+/** Товары в составе заказа (подписка — это interestType, не product). */
+export const ORDER_PRODUCTS = [
+  "ethiopia",
+  "colombia",
+  "brazil",
+  "drip",
+] as const;
+export type OrderProduct = (typeof ORDER_PRODUCTS)[number];
+
+/** Пачки для подписки (без дрипов). */
+export const PACK_PRODUCTS = ["ethiopia", "colombia", "brazil"] as const;
+export type PackProduct = (typeof PACK_PRODUCTS)[number];
+
+export const QTY_MIN = 1;
+export const QTY_MAX = 10;
+export const ONE_TIME_MAX_ITEMS = 4;
+export const SUBSCRIPTION_TOTAL_QTY = 2;
+
+/**
+ * Список для текущей формы (включает «subscription» как карточку).
+ * В items допускаются только ORDER_PRODUCTS.
+ */
 export const PRODUCTS = [
   "ethiopia",
   "colombia",
@@ -28,21 +50,8 @@ const INTEREST_LABELS: Record<InterestType, string> = {
   question: "Вопрос",
 };
 
-const PRODUCT_LABELS: Record<Product, string> = {
-  ethiopia: "Эфиопия",
-  colombia: "Колумбия",
-  brazil: "Бразилия",
-  drip: "Дрип-пакеты",
-  subscription: "Подписка",
-};
-
 export function interestTypeLabel(type: InterestType): string {
   return INTEREST_LABELS[type];
-}
-
-export function productLabel(product: Product | null): string {
-  if (!product) return "не указан";
-  return PRODUCT_LABELS[product];
 }
 
 /** Trim; пустая строка / отсутствие → null; иначе проверка длины. */
@@ -55,6 +64,32 @@ function optionalTrimmedNull(max: number, tooLongMessage: string) {
   }, z.string().max(max, tooLongMessage).nullable());
 }
 
+const orderItemSchema = z.object({
+  product: z.enum(ORDER_PRODUCTS, {
+    error: "Выберите вид кофе",
+  }),
+  qty: z
+    .number({ error: "Укажите количество" })
+    .int("Количество должно быть целым числом")
+    .min(QTY_MIN, `Количество от ${QTY_MIN} до ${QTY_MAX}`)
+    .max(QTY_MAX, `Количество от ${QTY_MIN} до ${QTY_MAX}`),
+});
+
+export type OrderItem = z.infer<typeof orderItemSchema>;
+
+function hasDuplicateProducts(items: OrderItem[]): boolean {
+  const seen = new Set<OrderProduct>();
+  for (const item of items) {
+    if (seen.has(item.product)) return true;
+    seen.add(item.product);
+  }
+  return false;
+}
+
+function isPackProduct(product: OrderProduct): product is PackProduct {
+  return (PACK_PRODUCTS as readonly string[]).includes(product);
+}
+
 export const leadSchema = z
   .object({
     name: z
@@ -65,10 +100,10 @@ export const leadSchema = z
     interestType: z.enum(INTEREST_TYPES, {
       error: "Выберите тип обращения",
     }),
-    product: z.preprocess((val) => {
-      if (val === "" || val == null) return null;
-      return val;
-    }, z.enum(PRODUCTS).nullable()),
+    items: z.preprocess(
+      (val) => (val === undefined ? [] : val),
+      z.array(orderItemSchema),
+    ),
     phone: z
       .string({ error: "Укажите телефон" })
       .trim()
@@ -82,37 +117,68 @@ export const leadSchema = z
       })
       .transform((value) => normalizeBelarusPhone(value)!),
     comment: optionalTrimmedNull(500, "Комментарий не длиннее 500 символов"),
-    utm_source: optionalTrimmedNull(100, "Не больше 100 символов"),
-    utm_campaign: optionalTrimmedNull(100, "Не больше 100 символов"),
-    landing_url: optionalTrimmedNull(500, "Не больше 500 символов"),
+    utmSource: optionalTrimmedNull(100, "Не больше 100 символов"),
+    utmCampaign: optionalTrimmedNull(100, "Не больше 100 символов"),
+    landingUrl: optionalTrimmedNull(500, "Не больше 500 символов"),
     /** Honeypot: если заполнено — бот; обрабатывается в route до сохранения. */
     website: z.string().optional(),
   })
   .superRefine((data, ctx) => {
-    const { interestType, product } = data;
+    const { interestType, items } = data;
 
-    if (interestType === "one_time") {
-      if (!product) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["product"],
-          message: "Выберите продукт для разового заказа",
-        });
-      } else if (product === "subscription") {
-        ctx.addIssue({
-          code: "custom",
-          path: ["product"],
-          message:
-            "Для разового заказа выберите кофе или дрип-пакеты, не подписку",
-        });
-      }
-    }
-
-    if (interestType === "subscription" && product !== "subscription") {
+    if (hasDuplicateProducts(items)) {
       ctx.addIssue({
         code: "custom",
-        path: ["product"],
-        message: "Для подписки продукт должен быть «Подписка»",
+        path: ["items"],
+        message: "Каждый вид кофе можно указать только один раз",
+      });
+      return;
+    }
+
+    if (interestType === "one_time") {
+      if (items.length === 0) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["items"],
+          message: "Выберите хотя бы один вид кофе",
+        });
+      } else if (items.length > ONE_TIME_MAX_ITEMS) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["items"],
+          message: `Можно выбрать не больше ${ONE_TIME_MAX_ITEMS} позиций`,
+        });
+      }
+      return;
+    }
+
+    if (interestType === "subscription") {
+      const hasNonPack = items.some((item) => !isPackProduct(item.product));
+      if (hasNonPack) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["items"],
+          message: "Для подписки можно выбрать только пачки кофе, без дрип-пакетов",
+        });
+        return;
+      }
+
+      const totalQty = items.reduce((sum, item) => sum + item.qty, 0);
+      if (totalQty !== SUBSCRIPTION_TOTAL_QTY) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["items"],
+          message: `Для подписки выберите 2 упаковки, сейчас выбрано ${totalQty}`,
+        });
+      }
+      return;
+    }
+
+    if (interestType === "question" && items.length > 0) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["items"],
+        message: "Для вопроса состав заказа не нужен",
       });
     }
   });

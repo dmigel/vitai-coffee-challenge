@@ -1,16 +1,17 @@
 import "server-only";
-import type { InterestType, Product } from "@/lib/lead-schema";
-import { interestTypeLabel, productLabel } from "@/lib/lead-schema";
+import { products } from "@/data/products";
+import type { InterestType, OrderItem } from "@/lib/lead-schema";
+import { interestTypeLabel } from "@/lib/lead-schema";
 
 export type TelegramLead = {
   interestType: InterestType;
-  product: Product | null;
+  items: OrderItem[];
   name: string;
   phone: string;
   comment: string | null;
-  utm_source: string | null;
-  utm_campaign: string | null;
-  landing_url: string | null;
+  utmSource: string | null;
+  utmCampaign: string | null;
+  landingUrl: string | null;
 };
 
 /** Экранирование для Telegram HTML parse_mode. */
@@ -21,26 +22,43 @@ export function escapeHtml(text: string): string {
     .replace(/>/g, "&gt;");
 }
 
-function sourceLine(
-  utm_source: string | null,
-  utm_campaign: string | null,
-): string {
-  if (utm_source || utm_campaign) {
-    return `${utm_source ?? "—"} / ${utm_campaign ?? "—"}`;
+function productName(productId: OrderItem["product"]): string {
+  return products.find((p) => p.id === productId)?.name ?? productId;
+}
+
+function formatItemsLines(items: OrderItem[]): string[] {
+  if (items.length === 0) {
+    return ["Состав: —"];
   }
-  return "не указан";
+  return [
+    "Состав:",
+    ...items.map(
+      (item) =>
+        `${escapeHtml(productName(item.product))} × ${item.qty}`,
+    ),
+  ];
+}
+
+function sourceLine(
+  utmSource: string | null,
+  utmCampaign: string | null,
+): string {
+  if (!utmSource && !utmCampaign) {
+    return "прямой заход";
+  }
+  return `${utmSource ?? "—"} / ${utmCampaign ?? "—"}`;
 }
 
 export function formatLeadMessage(lead: TelegramLead): string {
   const lines = [
     "<b>Новая заявка</b>",
     `Тип: ${escapeHtml(interestTypeLabel(lead.interestType))}`,
-    `Продукт: ${escapeHtml(productLabel(lead.product))}`,
+    ...formatItemsLines(lead.items),
     `Имя: ${escapeHtml(lead.name)}`,
     `Телефон: ${escapeHtml(lead.phone)}`,
     `Комментарий: ${escapeHtml(lead.comment ?? "—")}`,
-    `Источник: ${escapeHtml(sourceLine(lead.utm_source, lead.utm_campaign))}`,
-    `Страница входа: ${escapeHtml(lead.landing_url ?? "—")}`,
+    `Источник: ${escapeHtml(sourceLine(lead.utmSource, lead.utmCampaign))}`,
+    `Страница входа: ${escapeHtml(lead.landingUrl ?? "—")}`,
   ];
   return lines.join("\n");
 }

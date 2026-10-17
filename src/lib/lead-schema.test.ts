@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   BELARUS_PHONE_ERROR,
+  QTY_MAX,
+  QTY_MIN,
   leadSchema,
   normalizeBelarusPhone,
 } from "@/lib/lead-schema";
@@ -54,7 +56,7 @@ describe("leadSchema phone", () => {
   const base = {
     name: "Анна",
     interestType: "one_time" as const,
-    product: "ethiopia" as const,
+    items: [{ product: "ethiopia" as const, qty: 1 }],
   };
 
   it("нормализует телефон при валидации", () => {
@@ -81,53 +83,164 @@ describe("leadSchema phone", () => {
   });
 });
 
-describe("leadSchema product / interestType", () => {
+describe("leadSchema items / interestType", () => {
   const phone = "+375291234567";
 
-  it("one_time требует продукт и запрещает subscription", () => {
-    const missing = leadSchema.safeParse({
+  it("one_time: хотя бы одна позиция, без повторов, до 4 видов", () => {
+    const empty = leadSchema.safeParse({
       name: "Дима",
       interestType: "one_time",
+      items: [],
       phone,
     });
-    expect(missing.success).toBe(false);
+    expect(empty.success).toBe(false);
+    if (!empty.success) {
+      expect(empty.error.issues[0]?.message).toBe(
+        "Выберите хотя бы один вид кофе",
+      );
+    }
 
-    const sub = leadSchema.safeParse({
+    const dup = leadSchema.safeParse({
       name: "Дима",
       interestType: "one_time",
-      product: "subscription",
+      items: [
+        { product: "ethiopia", qty: 1 },
+        { product: "ethiopia", qty: 2 },
+      ],
       phone,
     });
-    expect(sub.success).toBe(false);
+    expect(dup.success).toBe(false);
+
+    const fourOk = leadSchema.safeParse({
+      name: "Дима",
+      interestType: "one_time",
+      items: [
+        { product: "ethiopia", qty: 1 },
+        { product: "colombia", qty: 1 },
+        { product: "brazil", qty: 1 },
+        { product: "drip", qty: 1 },
+      ],
+      phone,
+    });
+    expect(fourOk.success).toBe(true);
 
     const ok = leadSchema.safeParse({
       name: "Дима",
       interestType: "one_time",
-      product: "brazil",
+      items: [
+        { product: "ethiopia", qty: 2 },
+        { product: "drip", qty: 1 },
+      ],
       phone,
     });
     expect(ok.success).toBe(true);
   });
 
-  it("subscription требует product = subscription", () => {
-    const wrong = leadSchema.safeParse({
+  it("граничные qty: 1 и 10 ок, 0 и 11 — ошибка", () => {
+    const minOk = leadSchema.safeParse({
       name: "Дима",
-      interestType: "subscription",
-      product: "ethiopia",
+      interestType: "one_time",
+      items: [{ product: "brazil", qty: QTY_MIN }],
       phone,
     });
-    expect(wrong.success).toBe(false);
+    expect(minOk.success).toBe(true);
 
-    const ok = leadSchema.safeParse({
+    const maxOk = leadSchema.safeParse({
       name: "Дима",
-      interestType: "subscription",
-      product: "subscription",
+      interestType: "one_time",
+      items: [{ product: "brazil", qty: QTY_MAX }],
       phone,
     });
-    expect(ok.success).toBe(true);
+    expect(maxOk.success).toBe(true);
+
+    const zero = leadSchema.safeParse({
+      name: "Дима",
+      interestType: "one_time",
+      items: [{ product: "brazil", qty: 0 }],
+      phone,
+    });
+    expect(zero.success).toBe(false);
+
+    const eleven = leadSchema.safeParse({
+      name: "Дима",
+      interestType: "one_time",
+      items: [{ product: "brazil", qty: 11 }],
+      phone,
+    });
+    expect(eleven.success).toBe(false);
+
+    const notInt = leadSchema.safeParse({
+      name: "Дима",
+      interestType: "one_time",
+      items: [{ product: "brazil", qty: 1.5 }],
+      phone,
+    });
+    expect(notInt.success).toBe(false);
   });
 
-  it("question допускает отсутствие продукта", () => {
+  it("subscription: сумма qty ровно 2, только пачки", () => {
+    const onePack = leadSchema.safeParse({
+      name: "Дима",
+      interestType: "subscription",
+      items: [{ product: "ethiopia", qty: 1 }],
+      phone,
+    });
+    expect(onePack.success).toBe(false);
+    if (!onePack.success) {
+      expect(onePack.error.issues[0]?.message).toBe(
+        "Для подписки выберите 2 упаковки, сейчас выбрано 1",
+      );
+    }
+
+    const twoSame = leadSchema.safeParse({
+      name: "Дима",
+      interestType: "subscription",
+      items: [{ product: "ethiopia", qty: 2 }],
+      phone,
+    });
+    expect(twoSame.success).toBe(true);
+
+    const twoDifferent = leadSchema.safeParse({
+      name: "Дима",
+      interestType: "subscription",
+      items: [
+        { product: "ethiopia", qty: 1 },
+        { product: "colombia", qty: 1 },
+      ],
+      phone,
+    });
+    expect(twoDifferent.success).toBe(true);
+
+    const three = leadSchema.safeParse({
+      name: "Дима",
+      interestType: "subscription",
+      items: [
+        { product: "ethiopia", qty: 1 },
+        { product: "colombia", qty: 1 },
+        { product: "brazil", qty: 1 },
+      ],
+      phone,
+    });
+    expect(three.success).toBe(false);
+    if (!three.success) {
+      expect(three.error.issues[0]?.message).toBe(
+        "Для подписки выберите 2 упаковки, сейчас выбрано 3",
+      );
+    }
+
+    const withDrip = leadSchema.safeParse({
+      name: "Дима",
+      interestType: "subscription",
+      items: [
+        { product: "ethiopia", qty: 1 },
+        { product: "drip", qty: 1 },
+      ],
+      phone,
+    });
+    expect(withDrip.success).toBe(false);
+  });
+
+  it("question: items пустой; непустой — ошибка", () => {
     const ok = leadSchema.safeParse({
       name: "Дима",
       interestType: "question",
@@ -135,16 +248,16 @@ describe("leadSchema product / interestType", () => {
     });
     expect(ok.success).toBe(true);
     if (ok.success) {
-      expect(ok.data.product).toBeNull();
+      expect(ok.data.items).toEqual([]);
     }
 
-    const withProduct = leadSchema.safeParse({
+    const withItems = leadSchema.safeParse({
       name: "Дима",
       interestType: "question",
-      product: "drip",
+      items: [{ product: "drip", qty: 1 }],
       phone,
     });
-    expect(withProduct.success).toBe(true);
+    expect(withItems.success).toBe(false);
   });
 });
 
@@ -155,20 +268,33 @@ describe("leadSchema utm / comment trim", () => {
     phone: "+375291234567",
   };
 
+  it("заявка без UTM — валидна, поля null", () => {
+    const result = leadSchema.safeParse({
+      ...base,
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.utmSource).toBeNull();
+      expect(result.data.utmCampaign).toBeNull();
+      expect(result.data.landingUrl).toBeNull();
+      expect(result.data.items).toEqual([]);
+    }
+  });
+
   it("пустые utm и comment → null, trim пробелов", () => {
     const result = leadSchema.safeParse({
       ...base,
       comment: "   ",
-      utm_source: "  instagram  ",
-      utm_campaign: "",
-      landing_url: "  https://example.com/  ",
+      utmSource: "  instagram  ",
+      utmCampaign: "",
+      landingUrl: "  https://example.com/  ",
     });
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.comment).toBeNull();
-      expect(result.data.utm_source).toBe("instagram");
-      expect(result.data.utm_campaign).toBeNull();
-      expect(result.data.landing_url).toBe("https://example.com/");
+      expect(result.data.utmSource).toBe("instagram");
+      expect(result.data.utmCampaign).toBeNull();
+      expect(result.data.landingUrl).toBe("https://example.com/");
     }
   });
 
@@ -176,7 +302,7 @@ describe("leadSchema utm / comment trim", () => {
     const long = "x".repeat(101);
     const result = leadSchema.safeParse({
       ...base,
-      utm_source: long,
+      utmSource: long,
     });
     expect(result.success).toBe(false);
   });
