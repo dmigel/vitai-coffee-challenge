@@ -6,7 +6,7 @@ export function OrderForm() {
       id="order"
       className="scroll-mt-6 bg-white px-5 py-20 sm:px-8 sm:py-24 lg:px-16"
     >
-      <div className="mx-auto w-full max-w-[1280px]">
+      <div className="mx-auto flex w-full max-w-[1280px] flex-col items-center text-center">
         <h2 className="font-display max-w-2xl text-3xl leading-tight tracking-tight sm:text-4xl lg:text-5xl">
           Оформить заказ
         </h2>
@@ -15,7 +15,7 @@ export function OrderForm() {
           подтверждения.
         </p>
 
-        <div className="mt-10 max-w-xl">
+        <div className="mt-10 w-full max-w-xl text-left">
           <LeadForm />
         </div>
       </div>

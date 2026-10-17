@@ -19,12 +19,15 @@ import img5 from "@/assets/5.jpg";
  *   interest_type — "one_time" | "subscription" (из карточки; "question" форма выставит сама)
  *   product       — ProductId выбранной карточки
  *
- * Правила (SPEC): one_time → продукт обязателен и не "subscription";
- * subscription → product всегда "subscription".
+ * Правила (SPEC / Заказ v2):
+ *   one_time → продукт обязателен и не "subscription";
+ *     форма ставит этому product qty = 1, если было 0 (уже выбранное не трогает);
+ *   subscription → product всегда "subscription"; форма только переключает тип,
+ *     состав (2 упаковки) выбирает пользователь в блоке «Состав заказа».
  *
  * Форма читает `interest_type` и `product` из `window.location.search`
  * при монтировании, popstate / hashchange и событии `kvarta:order-prefill`,
- * и подставляет значения в поля. URL — общий канал передачи выбора.
+ * и подставляет значения. URL — общий канал передачи выбора.
  */
 
 export type ProductId =
