@@ -7,8 +7,10 @@
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "next lint",
-    "test": "vitest run"
+    "test": "vitest run",
+    "make-og": "tsx scripts/make-og.ts"
   },
+
   "dependencies": {
     "next": "15.5.28",
     "pg": "^8.23.1",
@@ -26,7 +28,9 @@
     "@types/react-dom": "^19",
     "eslint": "^9.39.5",
     "eslint-config-next": "^15.5.28",
+    "sharp": "^0.34.4",
     "tailwindcss": "^4",
+    "tsx": "^4.20.5",
     "typescript": "^5",
     "vitest": "^3.2.7"
   }

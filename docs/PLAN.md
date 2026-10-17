@@ -7,9 +7,11 @@
 ```text
 src/
   app/
-    layout.tsx
-    page.tsx
+    layout.tsx              # metadata, fonts, lang=ru
+    page.tsx                # 5 секций + JSON-LD
     globals.css
+    sitemap.ts
+    robots.ts
     api/lead/route.ts
   components/
     sections/
@@ -18,27 +20,35 @@ src/
       About.tsx
       OrderForm.tsx
       Contacts.tsx
-    HeroBackgroundVideo.tsx     # "use client"
-    ProductOrderButton.tsx      # "use client"
-    LeadForm.tsx                # "use client"; Заказ v2 (items + qty)
-    UtmCapture.tsx              # "use client"
-    YandexMap.tsx               # "use client"; iframe по клику
+    HeroBackgroundVideo.tsx # "use client"
+    ProductOrderButton.tsx  # "use client"
+    LeadForm.tsx            # "use client"; Заказ v2
+    UtmCapture.tsx          # "use client"
+    YandexMap.tsx           # "use client"; iframe по клику
+    JsonLd.tsx              # CoffeeShop schema
   data/
-    products.ts                 # 5 карточек + канал prefill (URL)
-    contacts.ts                 # адрес, coords, заглушки телефон / TG / IG
+    products.ts
+    contacts.ts
   lib/
-    lead-schema.ts              # zod: items, UTM camelCase
+    site.ts                 # title, description, getSiteUrl
+    lead-schema.ts
     lead-schema.test.ts
     phone.ts
     phone-mask.ts
-    utm.ts                      # localStorage + memory fallback
-    db.ts                       # server-only, pg pool
-    telegram.ts                 # server-only
-  assets/                       # logo, постер, 1–5.jpg, Anna, Dmitry
-public/video/                   # bgMin.mp4, bg.mp4
+    utm.ts
+    db.ts                   # server-only
+    telegram.ts             # server-only
+  assets/                   # logo, постер, 1–5.jpg, Anna, Dmitry
+public/
+  og.png                    # 1200×630
+  favicon.png
+  apple-touch-icon.png
+  video/                    # bgMin.mp4, bg.mp4
+scripts/
+  make-og.ts                # sharp → og / favicon / apple-touch
 supabase/migrations/
   001_leads.sql
-  002_leads.sql                 # items jsonb + create_lead(..., p_items jsonb, ...)
+  002_leads.sql             # items jsonb + create_lead
 docs/
   SPEC.md
   PLAN.md
@@ -48,38 +58,41 @@ vitest.config.ts
 
 ## Компоненты и файлы
 
-| Файл | Назначение | Статус |
-|---|---|---|
-| `src/app/layout.tsx` | `lang=ru`, next/font, `UtmCapture` | есть |
-| `src/app/page.tsx` | Сборка 5 секций | есть |
-| `src/app/globals.css` | Токены, Hero / Products / About / форма / Contacts | есть |
-| `src/components/sections/Hero.tsx` | `#hero` | есть |
-| `src/components/HeroBackgroundVideo.tsx` | Ленивое видео фона | есть |
-| `src/components/sections/Products.tsx` | `#products` | есть |
-| `src/components/ProductOrderButton.tsx` | CTA → `#order` (`interest_type` + `product` в URL) | есть |
-| `src/data/products.ts` | 5 карточек, тексты ТЗ, контракт prefill | есть |
-| `src/components/sections/About.tsx` | `#about` | есть |
-| `src/components/sections/OrderForm.tsx` | `#order` + `LeadForm`, блок по центру | есть |
-| `src/components/LeadForm.tsx` | Заказ v2: состав, qty, UTM optional | есть |
-| `src/components/UtmCapture.tsx` | Захват UTM при загрузке | есть |
-| `src/lib/utm.ts` | `captureUtmFromLocation` / `readUtm` | есть |
-| `src/components/sections/Contacts.tsx` | `#contacts`: самовывоз / доставка / связь + карта | есть |
-| `src/components/YandexMap.tsx` | CSS-заглушка; iframe по клику; placemark `pt` | есть |
-| `src/data/contacts.ts` | Адрес ул. Короля, 9; coords; заглушки контактов | есть |
-| `src/lib/phone.ts` | Коды BY, нормализация → `+375XXXXXXXXX` | есть |
-| `src/lib/phone-mask.ts` | Маска ввода телефона | есть |
-| `src/lib/lead-schema.ts` | zod: `items`, лимиты по типу, UTM optional | есть |
-| `src/lib/lead-schema.test.ts` | Vitest: телефон, items × 3 типа, qty, UTM | есть |
-| `src/lib/db.ts` | `pg` + `DATABASE_URL`, пул max:1 | есть |
-| `src/lib/telegram.ts` | Состав построчно, «прямой заход» без UTM | есть |
-| `src/app/api/lead/route.ts` | `POST /api/lead` → `create_lead(..., $4::jsonb, ...)` | есть |
-| `docs/manual-tests.md` | curl: UTM / items / подписка / дедуп | есть |
+| Файл | Назначение |
+|---|---|
+| `src/app/layout.tsx` | `lang=ru`, next/font, Metadata API (OG/Twitter), `UtmCapture` |
+| `src/app/page.tsx` | Сборка 5 секций, page metadata, `JsonLd` |
+| `src/app/globals.css` | Токены, Hero / Products / About / форма / Contacts |
+| `src/app/sitemap.ts` | `/sitemap.xml` |
+| `src/app/robots.ts` | `/robots.txt` |
+| `src/lib/site.ts` | `siteTitle`, `siteDescription`, `getSiteUrl` ← `NEXT_PUBLIC_SITE_URL` |
+| `src/components/JsonLd.tsx` | JSON-LD CoffeeShop (адрес, часы; без телефона/рейтингов) |
+| `src/components/sections/Hero.tsx` | `#hero`, единственный `h1` |
+| `src/components/HeroBackgroundVideo.tsx` | Ленивое видео фона |
+| `src/components/sections/Products.tsx` | `#products`, `h2` + карточки `h3` |
+| `src/components/ProductOrderButton.tsx` | CTA → `#order` (prefill через URL) |
+| `src/data/products.ts` | 5 карточек, тексты ТЗ |
+| `src/components/sections/About.tsx` | `#about` |
+| `src/components/sections/OrderForm.tsx` | `#order` + `LeadForm` |
+| `src/components/LeadForm.tsx` | Заказ v2: состав, qty, UTM optional |
+| `src/components/UtmCapture.tsx` | Захват UTM при загрузке |
+| `src/lib/utm.ts` | `captureUtmFromLocation` / `readUtm` |
+| `src/components/sections/Contacts.tsx` | `#contacts` |
+| `src/components/YandexMap.tsx` | Заглушка → iframe по клику |
+| `src/data/contacts.ts` | Адрес ул. Короля, 9; coords; заглушки контактов |
+| `src/lib/phone.ts` / `phone-mask.ts` | BY-телефон → `+375XXXXXXXXX`, маска |
+| `src/lib/lead-schema.ts` (+ test) | zod: items, лимиты по типу, UTM |
+| `src/lib/db.ts` | `pg` + `DATABASE_URL`, пул max:1 |
+| `src/lib/telegram.ts` | Уведомление с составом |
+| `src/app/api/lead/route.ts` | `POST /api/lead` → `create_lead` |
+| `scripts/make-og.ts` | OG 1200×630 + favicon + apple-touch из logo |
+| `docs/manual-tests.md` | curl-чеклист API |
 
 Server Components по умолчанию. `"use client"`: форма, UTM, видео, кнопка заказа, карта.
 
-Контейнер Products / About / Order / Contacts: `max-w-[1280px]`. Order: заголовок и форма по центру. Contacts: две колонки (текст слева, карта справа; с ~900px).
+Контейнер секций: `max-w-[1280px]`. Иерархия: один `h1` (Hero) → `h2` секций → `h3` подблоков.
 
-Env (имена в `.env.example`): `DATABASE_URL` (Transaction pooler, 6543), `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `NEXT_PUBLIC_SITE_URL`.
+Env (имена в `.env.example`): `DATABASE_URL`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `NEXT_PUBLIC_SITE_URL`.
 
 ## Дизайн-токены
 
@@ -103,58 +116,33 @@ Env (имена в `.env.example`): `DATABASE_URL` (Transaction pooler, 6543), `
 - `radius` / `rounded` — `1rem`
 - `radius-lg` / `rounded-lg` — `1.5rem`
 
-Products: фон белый; карточки — `box-shadow: 0 2px 10px rgba(143, 149, 172, .2)`; подписка — `border` accent; бейдж «Акция» — `#e11d48`.
-
-About: фон `background`; фото 50/50, `aspect-ratio: 4/5`, lazy `next/image`; блоки «секрет» / «график» без карточек.
-
-Contacts: фон `background`; блоки самовывоз / доставка / связь — списки без карточек; карта с фиксированной высотой (без CLS).
+Дополнительно в UI: бейдж «Акция» — `#e11d48`; тень карточек Products — `0 2px 10px rgba(143, 149, 172, .2)`.
 
 ## Шаг 2 (сделано)
 
-Каркас и база:
+Каркас: токены, Unbounded + Manrope, 5 секций с `id`, `scroll-behavior: smooth` + `prefers-reduced-motion`.
 
-- Токены в `globals.css`, mobile-first отступы
-- Шрифты Unbounded + Manrope
-- `layout.tsx` (`lang=ru`), `page.tsx` с пятью секциями (`id`: hero, products, about, order, contacts)
-- `scroll-behavior: smooth` (при `prefers-reduced-motion` — `auto`)
-- ESLint (`eslint-config-next`), `npm run lint`
+Контент: Hero (LCP-постер, ленивое видео), Products, About — тексты ТЗ; prefill из карточек через URL.
 
-Контент и заявка:
+Заявка (Заказ v2): `LeadForm` + `POST /api/lead` + `create_lead` (`items` jsonb); UTM optional; дедуп 10 мин; Vitest; `manual-tests.md`.
 
-- Hero, Products, About — тексты ТЗ, LCP-постер, ленивое видео, предвыбор через URL
-- UtmCapture + `utm.ts` (UTM необязательны)
-- OrderForm + LeadForm по Заказ v2:
-  - порядок: имя → тип → состав → телефон → комментарий
-  - состав: fieldset, степперы qty 0–10; one_time 4 позиции; subscription 3 пачки, сумма qty = 2; question → `items: []`
-  - выбор qty хранится отдельно по типу обращения
-  - ориентировочная сумма и подсказка доставки (клиентская)
-  - prefill из карточек: «Заказать» → one_time + qty 1; «Оформить подписку» → subscription; фокус на первом пустом поле
-  - payload: `{ name, interestType, items, phone, comment, utmSource?, utmCampaign?, landingUrl?, website }`
-  - дедуп-текст из SPEC, защита от двойной отправки, маска телефона, таймаут 15 с
-- API: `items` jsonb, `create_lead` из `002_leads.sql`, Telegram с составом
-- Vitest, `manual-tests.md`
-- Зависимости: `zod`, `pg`, `@types/pg`, `server-only`, `vitest`
+Contacts: самовывоз / доставка / связь (заглушки без ссылок); `YandexMap` — iframe только по клику.
 
-Contacts (Слайд 5):
-
-- Тексты SPEC; адрес Минск, ул. Короля, 9; coords `53.902241, 27.542023`
-- Самовывоз / доставка / «Связаться с нами быстро» — единый стиль списков; контакты без `<a>`, заглушки в `contacts.ts`
-- Сетка: слева контакты, справа карта (1 колонка на мобиле)
-- `YandexMap`: CSS-заглушка с логотипом-пином и «Показать карту»; iframe монтируется только по клику; `loading="lazy"`, `title`, фиксированная высота; метка дома через `pt` виджета; ссылка «Открыть в Яндекс.Картах»
+SEO / OG: Metadata API (`metadataBase`, canonical, `ru_BY`, Twitter `summary_large_image`); `public/og.png` + favicon / apple-touch; JSON-LD CoffeeShop; `sitemap.ts`, `robots.ts`; иерархия `h1`–`h2`.
 
 ## Следующие шаги
 
-1. SEO / Open Graph (логотип `src/assets/logo.png`)
-2. Лёгкий CSS-motion (transform/opacity), финальный lint/build и ручной прогон чеклиста
+1. Лёгкий CSS-motion (`transform` / `opacity`), уважение `prefers-reduced-motion`
+2. Финальный lint / build и ручной прогон чеклиста (`manual-tests.md` + визуал)
 
 ## Риски скорости
 
 | Риск | Снятие |
 |---|---|
-| Hero-видео (1.8–8 MB) | LCP = постер (`priority`); `<video>` после idle; `preload="metadata"`; fade на `canplay`; не грузить при reduced-motion / saveData / 2g; мобилка `bgMin.mp4`, десктоп `bg.mp4` |
-| Яндекс.Карта | SSR/CSS-заглушка; iframe только по клику; placemark через `pt` (без CSS-оверлея); фиксированная высота кадра |
+| Hero-видео (1.8–8 MB) | LCP = постер (`priority`); `<video>` после idle; `preload="metadata"`; не грузить при reduced-motion / saveData / 2g; мобилка `bgMin.mp4`, десктоп `bg.mp4` |
+| Яндекс.Карта | SSR/CSS-заглушка; iframe только по клику; фиксированная высота кадра |
 | Шрифты | `next/font`, 2 начертания, subset с кириллицей |
-| Клиентский JS | Минимум `"use client"`; анимации только CSS (`transform`/`opacity`); blur не анимировать |
-| Картинки | Только `next/image`; `priority` у одной LCP-картинки; Products / About без `priority`, `sizes` |
-| Двойная заявка | Дедуп в SQL (`create_lead` + advisory lock); honeypot `website`; `submittingRef` на клиенте |
-| Serverless + Postgres pooler | Пул `pg` один на модуль, `max: 1`, без именованных prepared statements, `ssl: { rejectUnauthorized: false }` |
+| Клиентский JS | Минимум `"use client"`; анимации только CSS; blur не анимировать |
+| Картинки | Только `next/image`; `priority` у одной LCP-картинки; остальные с `sizes` |
+| Двойная заявка | Дедуп в SQL; honeypot `website`; `submittingRef` на клиенте |
+| Serverless + Postgres pooler | Пул `pg` один на модуль, `max: 1`, без именованных prepared statements |
