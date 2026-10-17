@@ -214,3 +214,48 @@ body {
     transform: translateX(-120%);
   }
 }
+
+/* About: на мобиле фото между заголовком и текстом; с sm — текст над фото */
+.about-title {
+  order: 1;
+  margin-bottom: 1.25rem;
+}
+
+.about-photos {
+  order: 2;
+  margin-bottom: 1.25rem;
+}
+
+.about-intro {
+  order: 3;
+  margin-bottom: 1.5rem;
+}
+
+.about-accents {
+  order: 4;
+}
+
+@media (min-width: 640px) {
+  .about-title {
+    order: 1;
+    margin-bottom: 1.25rem;
+  }
+
+  .about-intro {
+    order: 2;
+    margin-bottom: 2.5rem;
+  }
+
+  .about-photos {
+    order: 3;
+    margin-bottom: 2.5rem;
+  }
+
+  .about-accents {
+    order: 4;
+  }
+}
+
+.about-photo {
+  aspect-ratio: 4 / 5;
+}
