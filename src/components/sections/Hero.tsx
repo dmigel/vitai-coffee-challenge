@@ -22,13 +22,13 @@ export function Hero() {
       <div className="hero-overlay absolute inset-0 z-[1]" aria-hidden />
       <div className="hero-glow" aria-hidden />
 
-      <div className="relative z-10 flex min-h-svh flex-col px-5 pb-12 pt-5 sm:px-8 sm:pb-16 sm:pt-6 lg:px-16 lg:pb-[100px]">
+      <div className="relative z-10 flex min-h-svh flex-col px-5 pb-32 pt-5 sm:px-8 sm:pb-32 sm:pt-6 lg:px-16 lg:pb-[100px]">
         <Image
           src={logo}
           alt="Кварта"
           width={60}
           height={60}
-          className="h-[60px] w-[60px] rounded-[20px]"
+          className="h-[75px] w-[75px] rounded-[20px]"
           sizes="60px"
         />
 

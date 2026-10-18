@@ -82,7 +82,7 @@ export function About() {
           обжарки, и открыли маленькую мастерскую «Кварта».
         </p>
 
-        <ul className="about-photos m-0 flex list-none gap-8 p-0">
+        <ul className="about-photos m-0 flex list-none lg:gap-8 md:gap-6 gap-4 p-0">
           <li className="min-w-0 flex-1">
             <figure className="m-0">
               <div className="about-photo relative overflow-hidden rounded-lg">

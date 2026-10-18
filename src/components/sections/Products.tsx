@@ -80,29 +80,37 @@ export function Products() {
   return (
     <section
       id="products"
-      className="scroll-mt-6 bg-white px-5 py-20 sm:px-8 sm:py-24 lg:px-16"
+      className="scroll-mt-6 bg-white px-5 py-14 sm:px-8 sm:py-20 lg:px-16"
     >
       <div className="mx-auto w-full max-w-[1280px]">
         <h2 className="font-display max-w-2xl text-3xl leading-tight tracking-tight sm:text-4xl lg:text-5xl">
           Продукция и акции
         </h2>
-
-        <ul className="products-grid products-grid--top mt-10 list-none p-0">
-          {topRow.map((product) => (
-            <li key={product.id}>
-              <ProductCard product={product} />
-            </li>
-          ))}
-        </ul>
-
-        <div className="products-bottom mt-7 md:mt-8">
-          <ul className="products-grid products-grid--bottom list-none p-0">
-            {bottomRow.map((product) => (
-              <li key={product.id}>
+        <div className="mt-10 md:grid md:grid-cols-4 lg:gap-8 md:gap-6 lg:block">
+          <ul className="grid list-none grid-cols-1 gap-7 p-0 md:contents lg:grid lg:grid-cols-3 lg:gap-8">
+            {topRow.map((product) => (
+              <li key={product.id} className="md:col-span-2 lg:col-span-1">
                 <ProductCard product={product} />
               </li>
             ))}
           </ul>
+
+          <div className="mt-7 md:contents lg:mt-8 lg:block">
+            <ul className="grid list-none grid-cols-1 gap-7 p-0 md:contents lg:grid lg:grid-cols-[repeat(2,calc((100%-4rem)/3))] lg:justify-center lg:gap-8">
+              {bottomRow.map((product, i) => (
+                <li
+                  key={product.id}
+                  className={
+                    i === bottomRow.length - 1
+                      ? "md:col-span-2 md:col-start-2 lg:col-span-1 lg:col-start-auto"
+                      : "md:col-span-2 lg:col-span-1"
+                  }
+                >
+                  <ProductCard product={product} />
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </div>
     </section>

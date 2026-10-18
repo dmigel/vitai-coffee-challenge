@@ -4,7 +4,7 @@ export function OrderForm() {
   return (
     <section
       id="order"
-      className="scroll-mt-6 bg-white px-5 py-20 sm:px-8 sm:py-24 lg:px-16"
+      className="scroll-mt-6 bg-white px-5 py-14 sm:px-8 sm:py-20 lg:px-16"
     >
       <div className="mx-auto flex w-full max-w-[1280px] flex-col items-center text-center">
         <h2 className="font-display max-w-2xl text-3xl leading-tight tracking-tight sm:text-4xl lg:text-5xl">

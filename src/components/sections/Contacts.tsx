@@ -5,7 +5,7 @@ export function Contacts() {
   return (
     <section
       id="contacts"
-      className="scroll-mt-6 bg-background px-5 py-20 sm:px-8 sm:py-24 lg:px-16"
+      className="scroll-mt-6 bg-background px-5 py-14 sm:px-8 sm:py-20 lg:px-16"
     >
       <div className="mx-auto w-full max-w-[1280px]">
         <h2 className="font-display max-w-3xl text-3xl leading-tight tracking-tight sm:text-4xl lg:text-5xl">
