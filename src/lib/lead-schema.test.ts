@@ -245,6 +245,7 @@ describe("leadSchema items / interestType", () => {
       name: "Дима",
       interestType: "question",
       phone,
+      comment: "Как оформить доставку?",
     });
     expect(ok.success).toBe(true);
     if (ok.success) {
@@ -256,15 +257,42 @@ describe("leadSchema items / interestType", () => {
       interestType: "question",
       items: [{ product: "drip", qty: 1 }],
       phone,
+      comment: "Как оформить доставку?",
     });
     expect(withItems.success).toBe(false);
+  });
+
+  it("question: пустой комментарий — ошибка", () => {
+    const empty = leadSchema.safeParse({
+      name: "Дима",
+      interestType: "question",
+      phone,
+    });
+    expect(empty.success).toBe(false);
+    if (!empty.success) {
+      const commentIssue = empty.error.issues.find(
+        (i) => i.path[0] === "comment",
+      );
+      expect(commentIssue?.message).toBe(
+        "Напишите ваш вопрос в комментарии",
+      );
+    }
+
+    const whitespace = leadSchema.safeParse({
+      name: "Дима",
+      interestType: "question",
+      phone,
+      comment: "   ",
+    });
+    expect(whitespace.success).toBe(false);
   });
 });
 
 describe("leadSchema utm / comment trim", () => {
   const base = {
     name: "Анна",
-    interestType: "question" as const,
+    interestType: "one_time" as const,
+    items: [{ product: "ethiopia" as const, qty: 1 }],
     phone: "+375291234567",
   };
 
@@ -277,7 +305,6 @@ describe("leadSchema utm / comment trim", () => {
       expect(result.data.utmSource).toBeNull();
       expect(result.data.utmCampaign).toBeNull();
       expect(result.data.landingUrl).toBeNull();
-      expect(result.data.items).toEqual([]);
     }
   });
 

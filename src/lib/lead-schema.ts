@@ -174,12 +174,21 @@ export const leadSchema = z
       return;
     }
 
-    if (interestType === "question" && items.length > 0) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["items"],
-        message: "Для вопроса состав заказа не нужен",
-      });
+    if (interestType === "question") {
+      if (items.length > 0) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["items"],
+          message: "Для вопроса состав заказа не нужен",
+        });
+      }
+      if (data.comment == null) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["comment"],
+          message: "Напишите ваш вопрос в комментарии",
+        });
+      }
     }
   });
 
